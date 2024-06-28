@@ -1,0 +1,58 @@
+﻿@page "/"
+@using BlazorRecordBinding.Models
+
+<PageTitle>Home</PageTitle>
+
+<h1>Data-bound component</h1>
+
+@* Notice how we can simply `@bind` our Project model directly to the component. *@
+<ProjectComponent @bind-Project="_model" @bind-Project:after="HandleProjectChanged" />
+
+<div>
+    <h1>Bound data</h1>
+    <div>Project name: @_model.Name</div>
+    @foreach (var board in _model.Boards)
+    {
+        <div>
+            <div>Board: @board.Name (@board.Id)</div>
+            <div>Work item names synced? @(board.Synced ? "YES" : "NO")</div>
+            <ul>
+                @foreach (var workItem in board.WorkItems)
+                {
+                    <li>@workItem.Name (@workItem.Id) - @workItem.Description - Done? @(workItem.Done ? "YES" : "NO")</li>
+                }
+            </ul>
+        </div>
+    }
+</div>
+
+@code {
+
+    private Project _model = new ("My Project", []);
+
+    // We can do things with our _model *after* it's been updated (this can be async if needed).
+    private void HandleProjectChanged()
+    {
+        var allWorkItems = _model.Boards.SelectMany(board => board.WorkItems.Select(workItem => workItem)).ToList();
+        if (allWorkItems.Count == 0)
+        {
+            return;
+        }
+        
+        var countByName = new Dictionary<string, int>();
+        foreach (var item in allWorkItems)
+        {
+            if (countByName.ContainsKey(item.Name))
+            {
+                countByName[item.Name]++;
+            }
+            else
+            {
+                countByName[item.Name] = 1;
+            }
+        }
+        
+        Console.WriteLine($"The most common work item name appears {countByName.Values.Max()} times.");
+    }
+
+}

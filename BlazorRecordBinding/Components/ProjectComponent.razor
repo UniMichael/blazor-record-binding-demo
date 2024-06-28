@@ -1,0 +1,84 @@
+﻿@using System.Collections.Immutable
+@using BlazorRecordBinding.Models
+<div class="project-container">
+    <div class="header">
+        <input type="text" @bind:get="@(Project.Name)" @bind:set="@(HandleProjectNameChangedAsync)" />
+        <button @onclick="@(AddBoardAsync)">Add board</button>
+    </div>
+    <div>
+        When a board's work item names are synced, changing the name of any of its work items will rename all work items
+        that are inside a synced board to the same thing (this works across boards as well).
+    </div>
+    <div>
+        This serves no other purpose than to showcase that a component hierarchy can respond to state mutations by
+        mutating a different part of its state.
+    </div>
+    <div class="boards">
+        @foreach (var board in Project.Boards)
+        {
+            <BoardComponent @bind-Board:get="board" @bind-Board:set="HandleBoardChangedAsync"/>
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public Project Project { get; set; } = null!;
+    
+    [Parameter]
+    public EventCallback<Project> ProjectChanged { get; set; }
+    
+    private async Task AddBoardAsync()
+    {
+        var board = new Board(Guid.NewGuid(), "My new board", false, []);
+        var boards = Project.Boards.Add(board);
+        await ProjectChanged.InvokeAsync(Project with { Boards = boards });
+    }
+
+    private async Task HandleProjectNameChangedAsync(string name)
+    {
+        await ProjectChanged.InvokeAsync(Project with { Name = name });
+    }
+
+    private async Task HandleBoardChangedAsync(Board board)
+    {
+        var index = Project.Boards.FindIndex(b => b.Id == board.Id);
+        
+        // We may want to modify the elements in our list, so make it a regular list,
+        // then convert it to an immutable list when using ProjectChanged.InvokeAsync().
+        var boards = new List<Board>(Project.Boards)
+        {
+            [index] = board,
+        };
+
+        // Syncing boards makes their work items share the same name. This serves no practical purpose other than to
+        // showcase how this approach to binding still allows for flexibility in your component hierarchy's logic. 
+        if (board.Synced)
+        {
+            // Because this event handler handles cases where a WorkItem is modified, we can assume both lists still
+            // have the same size. We can use Zip() to iterate over the "previous" state and the "next" state of every
+            // WorkItem in our board.
+            foreach (var (prev, next) in Project.Boards[index].WorkItems.Zip(board.WorkItems))
+            {
+                if (prev.Name != next.Name)
+                {
+                    var syncedName = next.Name;
+                    for (var i = 0; i < boards.Count; ++i)
+                    {
+                        var nextBoard = boards[i];
+                        if (nextBoard.Synced)
+                        {
+                            boards[i] = nextBoard with { WorkItems = nextBoard.WorkItems.Select(workItem => workItem with { Name = syncedName }).ToImmutableList() };
+                        }
+                    }
+
+                    break;
+                }
+            }
+        }
+        
+        await ProjectChanged.InvokeAsync(Project with { Boards = boards.ToImmutableList() });
+    }
+    
+}

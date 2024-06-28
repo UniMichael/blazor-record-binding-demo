@@ -1,0 +1,11 @@
+﻿.project-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    
+    & > .header, & > .boards {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+}

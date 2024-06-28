@@ -1,0 +1,31 @@
+﻿@using BlazorRecordBinding.Models
+<div class="work-item-container">
+    <div class="side">
+        <input type="checkbox" @bind:get="@(WorkItem.Done)" @bind:set="@(HandleDoneChangedAsync)" />
+    </div>
+    <div class="header">
+        <input type="text" @bind:get="@(WorkItem.Name)" @bind:set="@(HandleNameChangedAsync)" />
+    </div>
+    <div class="body">
+        <textarea @bind:get="@(WorkItem.Description)" @bind:set="@(HandleDescriptionChangedAsync)"></textarea>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public WorkItem WorkItem { get; set; } = null!;
+    
+    [Parameter]
+    public EventCallback<WorkItem> WorkItemChanged { get; set; }
+
+    private async Task HandleDoneChangedAsync(bool done) =>
+        await WorkItemChanged.InvokeAsync(WorkItem with {Done = done});
+    
+    private async Task HandleNameChangedAsync(string name) =>
+        await WorkItemChanged.InvokeAsync(WorkItem with { Name = name});
+    
+    private async Task HandleDescriptionChangedAsync(string description) =>
+        await WorkItemChanged.InvokeAsync(WorkItem with { Description = description });
+    
+}

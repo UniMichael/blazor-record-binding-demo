@@ -1,0 +1,55 @@
+﻿@using System.Collections.Immutable
+@using BlazorRecordBinding.Models
+<div class="board-container">
+    <div class="header">
+        <input type="text" @bind:get="@(Board.Name)" @bind:set="@(HandleBoardNameChangedAsync)" />
+    </div>
+    <div class="work-items">
+        <button @onclick="@(AddWorkItemAsync)">Add work item</button>
+        <button @onclick="@(CheckAllWorkItemsAsync)">Check all</button>
+        <label>
+            <input type="checkbox" @bind:get="Board.Synced" @bind:set="HandleBoardSyncedChangedAsync"/>
+            Sync work item name changes (across-boards too)
+        </label>
+        @foreach (var workItem in Board.WorkItems)
+        {
+            <WorkItemComponent @bind-WorkItem:get="workItem" @bind-WorkItem:set="HandleWorkItemChangedAsync"/>
+        }
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public Board Board { get; set; } = null!;
+    
+    [Parameter]
+    public EventCallback<Board> BoardChanged { get; set; }
+    
+    private async Task AddWorkItemAsync()
+    {
+        var workItem = new WorkItem(Guid.NewGuid(), "New work item");
+        var workItems = Board.WorkItems.Add(workItem);
+        await BoardChanged.InvokeAsync(Board with { WorkItems = workItems });
+    }
+
+    private async Task HandleBoardSyncedChangedAsync(bool synced) =>
+        await BoardChanged.InvokeAsync(Board with { Synced = synced });
+
+    private async Task CheckAllWorkItemsAsync()
+    {
+        var nextWorkItems = Board.WorkItems.Select(workItem => workItem with { Done = true }).ToImmutableList();
+        await BoardChanged.InvokeAsync(Board with { WorkItems = nextWorkItems });
+    }
+    
+    private async Task HandleBoardNameChangedAsync(string name) =>
+        await BoardChanged.InvokeAsync(Board with { Name = name });
+    
+    private async Task HandleWorkItemChangedAsync(WorkItem workItem)
+    {
+        var index = Board.WorkItems.FindIndex(w => w.Id == workItem.Id);
+        var workItems = Board.WorkItems.SetItem(index, workItem);
+        await BoardChanged.InvokeAsync(Board with { WorkItems = workItems});
+    }
+
+}

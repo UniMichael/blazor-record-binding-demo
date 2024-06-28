@@ -1,0 +1,24 @@
+﻿.board-container {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    border-radius: 10px;
+    width: fit-content;
+    max-width: fit-content;
+    
+    & > .header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid black;
+    }
+
+    & > .work-items {
+        display: flex;
+        flex-direction: column;
+        justify-content: stretch;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+}

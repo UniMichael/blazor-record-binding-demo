@@ -1,0 +1,40 @@
+﻿.work-item-container {
+    flex-grow: 1;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-areas:
+            "side header"
+            "side body";
+    grid-template-columns: fit-content(10%) 1fr;
+    
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 1rem;
+    
+    & > .side {
+        grid-area: side;
+        
+        width: fit-content;
+        max-width: fit-content;
+    }
+    
+    & > .header {
+        grid-area: header;
+        display: flex;
+        align-items: start;
+        
+        & input {
+            width: 100%;
+        }
+    }
+    
+    & > .body {
+        grid-area: body;
+        
+        & textarea {
+            width: 100%;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+    }
+}
