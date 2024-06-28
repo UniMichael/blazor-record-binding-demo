@@ -36,10 +36,8 @@
         await ProjectChanged.InvokeAsync(Project with { Boards = boards });
     }
 
-    private async Task HandleProjectNameChangedAsync(string name)
-    {
+    private async Task HandleProjectNameChangedAsync(string name) => 
         await ProjectChanged.InvokeAsync(Project with { Name = name });
-    }
 
     private async Task HandleBoardChangedAsync(Board board)
     {
