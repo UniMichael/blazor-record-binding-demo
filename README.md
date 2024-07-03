@@ -37,7 +37,7 @@ A parent component/page binds a value to a child component. When this component 
 value, the component notifies the parent that the value should be changed. The parent then updates the value and
 re-renders.
 
-That's how `[Parameter]` and `EventCallback<T>` work. A component __should not__ update a `parameter directly by using
+That's how `[Parameter]` and `EventCallback<T>` work. A component __should not__ update a parameter directly by using
 its setter. Instead, it should notify the parent component/page using `EventCallback<T>.InvokeAsync(newValue)`.
 
 ### Records
