@@ -3,6 +3,19 @@
 This project is a small demo showcasing an approach to data binding in Blazor using `record` objects and immutable
 collections.
 
+It has limitations that make it a deal-breaker for any serious applications, but it's a fun example of how Blazor
+could work if it were to properly support immutable `record` models as first-class citizens in the future.
+
+## Limitations
+
+Before we get started, you should know that there is a major problem with this approach:
+
+Blazor's built-in form validation will not work, due to how it uses `FieldIdentifier`s internally. Whenever we create a
+copy of a `record`, its validation state will be lost.
+
+It's _technically_ possible to make this implementation work if you write your own `<form>` wrapper and avoid using
+Blazor's built-in `<EditForm>` component, but this isn't covered in this demo.
+
 ## Motivation
 
 Imagine you have a non-trivial data model. It's an object that may have nested objects (including collections, which may
